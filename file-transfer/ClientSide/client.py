@@ -5,6 +5,11 @@ import tqdm
 
 help_msg = "Valid commands are: iWant, uTake, help\nType ';;;' to exit."
 
+SEPERATOR = "<SEPERATOR>"
+
+buff_size = 4096
+
+
 def client_program():
     if(len(sys.argv) != 3):
         print("Usage: python client.py <server_(IP)_address> <server_port_number>")
