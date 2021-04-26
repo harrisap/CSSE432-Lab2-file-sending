@@ -3,6 +3,8 @@ import sys
 import os
 import tqdm
 
+help_msg = "Valid commands are: iWant, uTake, help\nType ';;;' to exit."
+
 def client_program():
     if(len(sys.argv) != 3):
         print("Usage: python client.py <server_(IP)_address> <server_port_number>")
@@ -16,16 +18,22 @@ def client_program():
 
     client_socket.connect(server_addr)
 
-    message = input(" -> ")
+    print(help_msg)
 
-    while message.lower().strip() != ';;;':
-        client_socket.send(message.encode())
+    while True:
+        message = input("> ")
+        message = message.lower().strip()
+        if message == ';;;':
+            break
+        elif message == 'help':
+            print(help_msg)
+        else:
+            client_socket.send(message.encode())
 
-        data = client_socket.recv(1024).decode()
+            data = client_socket.recv(1024).decode()
 
-        print("Received from server: " + str(data))
+            print("Received from server: " + str(data))
 
-        message = input(" -> ")
 
     client_socket.close()
 
