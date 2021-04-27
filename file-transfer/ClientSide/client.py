@@ -56,6 +56,8 @@ def client_program():
 
                         # server is requesting data info
 
+                        print("Server waiting for file information...")
+
                         client_socket.send(
                             f"{filename}{SEPERATOR}{filesize}".encode())
 
@@ -63,6 +65,7 @@ def client_program():
 
                         if(str(response) == "YRECV"):
 
+                            print("Server accepted transfer!")
 
                             progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
 
