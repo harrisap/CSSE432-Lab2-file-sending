@@ -128,7 +128,7 @@ def handleIWant(client_socket, message):
             # progress = tqdm.tqdm(range(
             #     nfilesize), f"Receiving {nfilename}", unit="B", unit_scale=True, unit_divisor=1024)
 
-            receiveFile(savelocation, client_socket)
+            receiveFile(savelocation + f"/{nfilename}", client_socket)
 
                     # progress.update(len(bytes_read))
         except ValueError:
