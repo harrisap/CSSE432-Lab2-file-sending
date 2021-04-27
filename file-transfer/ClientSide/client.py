@@ -83,7 +83,6 @@ def handleUTake(message, client_socket):
 
             else:
                 print("server did not accept request 1")
-                # server did not accept request
 
         else:
             print("server did not accept request 2")

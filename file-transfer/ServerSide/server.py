@@ -25,7 +25,7 @@ def server_program():
 
     print(f"Opened server on port {port}. I am {host}")
 
-    server_socket.listen(2) # buffer 2 incoming requests
+    server_socket.listen(10)
 
     data = "just_opened"
     while data != "CLOSE_ME":
@@ -52,6 +52,7 @@ def server_program():
                 handleUTake(data_stripped, connection)
             else:
                 print("unrecognized data format")
+
         except ConnectionResetError:
             print("Client connection was reset - disconnecting them")
             connection.close()
@@ -84,6 +85,7 @@ def handleUTake(data_stripped, connection):
     print("Sent YRECV. awaiting file data")
 
     receiveFile(filename, filesize, connection)
+    connection.close()
 
 def handleIWant(data_stripped, connection):
     filePath = data_stripped[6::]
