@@ -81,6 +81,7 @@ def client_program():
                                     if not bytes_read:
                                         # file transmission is finished
                                         print("File sent!")
+                                        client_socket.sendall(bytes_read) # send again just in case. stops weird timing issue?
                                         client_socket.send("FSENT".encode())
                                         # progress.update(len(bytes_read))
                                         break
@@ -149,6 +150,8 @@ def client_program():
                 
                 else:
                     print("File does not exist in server...")
+                    print("Got back: ")
+                    print(data)
 
             else:
                 print("not a valid command")

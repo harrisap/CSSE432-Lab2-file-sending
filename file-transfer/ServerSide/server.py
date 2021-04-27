@@ -52,6 +52,7 @@ def server_program():
                     print("calling iWant. Path is: " + filePath)
 
                     if(path.exists(filePath)):
+                        print("File exists, sending FILEE")
                         connection.send("FILEE".encode()) # file exists
 
                         response = connection.recv(1024).decode()
@@ -66,8 +67,6 @@ def server_program():
                             if(str(response) == "YRECV"):
                                 print("Got YRECV - sending file contents")
 
-                                progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
-
                                 with open(filename, "rb") as f:
                                     while True:
                                         # read the bytes from the file
@@ -77,12 +76,12 @@ def server_program():
                                         if not bytes_read:
                                             # file transmission is finished
                                             print("File sent!")
+                                            connection.sendall(bytes_read) # send again just in case. stops weird timing issue?
                                             connection.send("FSENT".encode())
                                             break
 
                                         connection.sendall(bytes_read)
-                                        progress.update(len(bytes_read))
-                                
+
                                 print("Done sending file")
                             else:
                                 print("Client did not send YRECV")
@@ -90,7 +89,7 @@ def server_program():
                         else:
                             print("Client did not send DATAI")
                     else:
-                        print("Requested file " + filePath + " does not exist")
+                        print("Requested file " + filePath + " does not exist, sending FILEN")
                         connection.send("FILEN".encode()) # file does not exist
 
                 elif data_stripped.find("uTake ", 0) == 0:
