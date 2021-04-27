@@ -81,7 +81,8 @@ def client_program():
                         print("server did not accept request")
                         # server did not accept request
                 else:
-                    print("file to send does not exist")
+                    print("file to send does not exist. cwd is:")
+                    print(os.getcwd())
                     # file to send does not exist
 
             elif (command == "iWant"):
