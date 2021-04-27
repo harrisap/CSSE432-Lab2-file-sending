@@ -81,11 +81,11 @@ def client_program():
                                     progress.update(len(bytes_read))
 
                         else:
-                            print("server did not accept request")
+                            print("server did not accept request 1")
                             # server did not accept request
 
                     else:
-                        print("server did not accept request")
+                        print("server did not accept request 2")
                     
                 else:
                     print("file to send does not exist. cwd is:")
