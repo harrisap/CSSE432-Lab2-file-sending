@@ -48,6 +48,8 @@ def server_program():
                     path = data_stripped[6::]
                     print(path)
 
+                    connection.send("DATAI".encode())
+
                     # receive the file infos
                     # receive using client socket, not server socket
                     received = connection.recv(BUFFER_SIZE).decode()
@@ -56,7 +58,11 @@ def server_program():
                     filename = os.path.basename(filename)
                     # convert to integer
                     filesize = int(filesize)
+
+                    connection.send("YRECV".encode())
+
                     receive_file(filename, filesize, connection)
+
 
                 else:
                     print("unrecognized")
