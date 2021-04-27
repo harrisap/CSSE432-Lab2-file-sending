@@ -67,7 +67,8 @@ def client_program():
 
                             print("Server accepted transfer!")
 
-                            progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
+                            # progress = tqdm.tqdm(range(
+                            #     filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
 
                             with open(filename, "rb") as f:
                                 while True:
@@ -78,10 +79,11 @@ def client_program():
                                     if not bytes_read:
                                         # file transmission is finished
                                         print("File sent!")
+                                        # progress.update(len(bytes_read))
                                         break
 
                                     client_socket.sendall(bytes_read)
-                                    progress.update(len(bytes_read))
+                                    # progress.update(len(bytes_read))
 
                         else:
                             print("server did not accept request 1")
@@ -89,7 +91,7 @@ def client_program():
 
                     else:
                         print("server did not accept request 2")
-                    
+
                 else:
                     print("file to send does not exist. cwd is:")
                     print(os.getcwd())
@@ -103,34 +105,46 @@ def client_program():
 
                 data = client_socket.recv(1024).decode()
 
-                try:
-                    recvfilename, recvfilesize = data.split(SEPARATOR)
+                if(data == "FILEE"):
+                    client_socket.send("DATAI".encode())
 
-                    nfilename = os.path.basename(recvfilename)
+                    data = client_socket.recv(1024).decode()
 
-                    nfilesize = int(recvfilesize)
+                    try:
+                        recvfilename, recvfilesize = data.split(SEPARATOR)
 
-                    savelocation = input("Save to > ")
-                    savelocation = savelocation.strip()
+                        nfilename = os.path.basename(recvfilename)
 
-                    progress = tqdm.tqdm(range(nfilesize), f"Receiving {nfilename}", unit="B", unit_scale=True, unit_divisor=1024)
+                        nfilesize = int(recvfilesize)
 
-                    with open(savelocation, "wb") as f:
-                        while True:
+                        savelocation = input("Save to > ")
+                        savelocation = savelocation.strip()
 
-                            bytes_read = client_socket.recv(buff_size)
+                        client_socket.send("YRECV".encode())
 
-                            if not bytes_read:
-                                #nothing recieved
-                                print("File transfer finished.")
+                        # progress = tqdm.tqdm(range(
+                        #     nfilesize), f"Receiving {nfilename}", unit="B", unit_scale=True, unit_divisor=1024)
 
-                                break
+                        with open(savelocation, "wb") as f:
+                            while True:
 
-                            f.write(bytes_read)
+                                bytes_read = client_socket.recv(buff_size)
 
-                            progress.update(len(bytes_read))
-                except ValueError:
-                    print("⚠ Bad structure for response data")
+                                if not bytes_read:
+                                    # nothing recieved
+                                    print("File transfer finished.")
+                                    # progress.update(len(bytes_read))
+
+                                    break
+
+                                f.write(bytes_read)
+
+                                # progress.update(len(bytes_read))
+                    except ValueError:
+                        print("⚠ Bad structure for response data")
+                
+                else:
+                    print("File does not exist in server...")
 
             else:
                 print("not a valid command")
