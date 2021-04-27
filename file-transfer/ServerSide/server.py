@@ -53,6 +53,7 @@ def server_program():
                     # receive the file infos
                     # receive using client socket, not server socket
                     received = connection.recv(BUFFER_SIZE).decode()
+                    print(received)
                     filename, filesize = received.split(SEPARATOR)
                     # remove absolute path if there is
                     filename = os.path.basename(filename)

@@ -7,7 +7,7 @@ from os import path
 
 help_msg = "Valid commands are: iWant, uTake, help\nType ';;;' to exit."
 
-SEPERATOR = "<SEPERATOR>"
+SEPARATOR = "<SEPARATOR>"
 
 buff_size = 1024
 
@@ -59,7 +59,7 @@ def client_program():
                         print("Server waiting for file information...")
 
                         client_socket.send(
-                            f"{filename}{SEPERATOR}{filesize}".encode())
+                            f"{filename}{SEPARATOR}{filesize}".encode())
 
                         response = client_socket.recv(1024).decode()
 
@@ -104,7 +104,7 @@ def client_program():
                 data = client_socket.recv(1024).decode()
 
                 try:
-                    recvfilename, recvfilesize = data.split(SEPERATOR)
+                    recvfilename, recvfilesize = data.split(SEPARATOR)
 
                     nfilename = os.path.basename(recvfilename)
 
