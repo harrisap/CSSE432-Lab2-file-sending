@@ -26,6 +26,8 @@ def client_program():
 
     print(help_msg)
 
+    #TODO connectionreseterror
+
     while True:
         message = input("> ")
         message = message.strip()

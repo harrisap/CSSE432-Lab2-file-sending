@@ -2,6 +2,8 @@ import socket
 import sys
 import tqdm
 import os
+import os.path
+from os import path
 
 SEPARATOR = "<SEPARATOR>"
 BUFFER_SIZE = 4096
@@ -34,6 +36,9 @@ def server_program():
             # receive data. we will call break when the connection closes
             while True:
                 data = connection.recv(1024).decode() # max 1024 bytes to receive at once
+                print("==GOT==")
+                print(data)
+                print("=======")
                 if not data: # something went wrong, or no more data. exit the loop for this connection.
                     break
                 data_stripped = data.strip()
@@ -42,11 +47,53 @@ def server_program():
                     connection.send("Shutting down".encode())
                     break
                 elif data_stripped.find("iWant ", 0) == 0: # command words must be at the very start
-                    print("calling iWant")
+                    filePath = data_stripped[6::]
+                    print("calling iWant. Path is: " + filePath)
+
+                    if(path.exists(filePath)):
+                        connection.send("FILEE".encode()) # file exists
+
+                        response = connection.recv(1024).decode()
+                        if(str(response) == "DATAI"):
+                            print("Got DATAI - sending file info")
+
+                            filename = filePath
+                            filesize = os.path.getsize(filename)
+                            connection.send(f"{filename}{SEPARATOR}{filesize}".encode())
+
+                            response = connection.recv(1024).decode()
+                            if(str(response) == "YRECV"):
+                                print("Got YRECV - sending file contents")
+
+                                progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
+
+                                with open(filename, "rb") as f:
+                                    while True:
+                                        # read the bytes from the file
+
+                                        bytes_read = f.read(BUFFER_SIZE)
+
+                                        if not bytes_read:
+                                            # file transmission is finished
+                                            print("File sent!")
+                                            break
+
+                                        connection.sendall(bytes_read)
+                                        progress.update(len(bytes_read))
+                                
+                                print("Done sending file")
+                            else:
+                                print("Client did not send YRECV")
+
+                        else:
+                            print("Client did not send DATAI")
+                    else:
+                        print("Requested file " + filePath + " does not exist")
+                        connection.send("FILEN".encode()) # file does not exist
+
                 elif data_stripped.find("uTake ", 0) == 0:
-                    print("calling uTake")
-                    path = data_stripped[6::]
-                    print(path)
+                    filePath = data_stripped[6::]
+                    print("calling uTake. Path is: " + filePath)
 
                     connection.send("DATAI".encode())
 
@@ -64,16 +111,17 @@ def server_program():
 
                     receive_file(filename, filesize, connection)
 
-
                 else:
-                    print("unrecognized")
-                
+                    print("unrecognized data format")
 
                 print("\tFrom " + str(client_address) +": " + str(data))
                 data = str(data).upper()
                 connection.send(data.encode())
         except ConnectionResetError:
             print("Client connection was reset - disconnecting them")
+            connection.close()
+        except ConnectionAbortedError:
+            print("Client connection was aborted - disconnecting them")
             connection.close()
 
 
@@ -85,19 +133,20 @@ def server_program():
 def receive_file(filename, filesize, client_socket):
     # start receiving the file from the socket
     # and writing to the file stream
-    progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
+    # progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
     with open(filename, "wb") as f:
         while True:
-            # read 1024 bytes from the socket (receive)
             bytes_read = client_socket.recv(BUFFER_SIZE)
             if not bytes_read:    
-                # nothing is received
-                # file transmitting is done
+                # nothing is received; file transmitting is done
                 break
             # write to the file the bytes we just received
             f.write(bytes_read)
             # update the progress bar
-            progress.update(len(bytes_read))
+            # progress.update(len(bytes_read))
+        # final draw of progress bar
+        # progress.update(len(bytes_read))
+        # print(flush=True)
 
     # close the client socket
     # client_socket.close()
