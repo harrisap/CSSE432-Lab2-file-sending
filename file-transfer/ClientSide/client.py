@@ -61,25 +61,32 @@ def client_program():
 
                         response = client_socket.recv(1024).decode()
 
-                        progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
+                        if(str(response) == "YRECV"):
 
-                        with open(filename, "rb") as f:
-                            while True:
-                                # read the bytes from the file
 
-                                bytes_read = f.read(buff_size)
+                            progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
 
-                                if not bytes_read:
-                                    # file transmission is finished
-                                    print("File sent!")
-                                    break
+                            with open(filename, "rb") as f:
+                                while True:
+                                    # read the bytes from the file
 
-                                client_socket.sendall(bytes_read)
-                                progress.update(len(bytes_read))
+                                    bytes_read = f.read(buff_size)
+
+                                    if not bytes_read:
+                                        # file transmission is finished
+                                        print("File sent!")
+                                        break
+
+                                    client_socket.sendall(bytes_read)
+                                    progress.update(len(bytes_read))
+
+                        else:
+                            print("server did not accept request")
+                            # server did not accept request
 
                     else:
                         print("server did not accept request")
-                        # server did not accept request
+                    
                 else:
                     print("file to send does not exist. cwd is:")
                     print(os.getcwd())
@@ -91,44 +98,40 @@ def client_program():
 
                 client_socket.send(message.encode())
 
-                response = client_socket.recv(buff_size).decode()
+                data = client_socket.recv(1024).decode()
+
+                try:
+                    recvfilename, recvfilesize = data.split(SEPERATOR)
+
+                    nfilename = os.path.basename(recvfilename)
+
+                    nfilesize = int(recvfilesize)
+
+                    savelocation = input("Save to > ")
+                    savelocation = savelocation.strip()
+
+                    progress = tqdm.tqdm(range(nfilesize), f"Receiving {nfilename}", unit="B", unit_scale=True, unit_divisor=1024)
+
+                    with open(savelocation, "wb") as f:
+                        while True:
+
+                            bytes_read = client_socket.recv(buff_size)
+
+                            if not bytes_read:
+                                #nothing recieved
+                                print("File transfer finished.")
+
+                                break
+
+                            f.write(bytes_read)
+
+                            progress.update(len(bytes_read))
+                except ValueError:
+                    print("⚠ Bad structure for response data")
 
             else:
                 print("not a valid command")
                 # not a valid command
-
-            client_socket.send(message.encode())
-
-            data = client_socket.recv(1024).decode()
-
-            try:
-                recvfilename, recvfilesize = data.split(SEPERATOR)
-
-                nfilename = os.path.basename(recvfilename)
-
-                nfilesize = int(recvfilesize)
-
-                savelocation = input("Save to > ")
-                savelocation = savelocation.strip()
-
-                progress = tqdm.tqdm(range(nfilesize), f"Receiving {nfilename}", unit="B", unit_scale=True, unit_divisor=1024)
-
-                with open(savelocation, "wb") as f:
-                    while True:
-
-                        bytes_read = client_socket.recv(buff_size)
-
-                        if not bytes_read:
-                            #nothing recieved
-                            print("File transfer finished.")
-
-                            break
-
-                        f.write(bytes_read)
-
-                        progress.update(len(bytes_read))
-            except ValueError:
-                print("⚠ Bad structure for response data")
 
     client_socket.close()
 
