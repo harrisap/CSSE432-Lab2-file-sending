@@ -88,6 +88,8 @@ def client_program():
 
                                     client_socket.sendall(bytes_read)
                                     # progress.update(len(bytes_read))
+                                
+                                client_socket.close()
 
                         else:
                             print("server did not accept request 1")

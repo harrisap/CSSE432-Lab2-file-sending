@@ -137,16 +137,20 @@ def receive_file(filename, filesize, client_socket):
     # and writing to the file stream
     # progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
     with open(filename, "wb") as f:
-        while True:
-            bytes_read = client_socket.recv(BUFFER_SIZE)
+        bytes_read = client_socket.recv(BUFFER_SIZE)
+        while bytes_read:
             decoded_bytes = bytes_read.decode()
+            print('data=%s', (bytes_read))
 
-            if not bytes_read or decoded_bytes == "FSENT" :
-                # nothing is received; file transmitting is done
-                print("Finished recv")
-                break
+            # if not bytes_read or decoded_bytes == "FSENT" :
+            #     # nothing is received; file transmitting is done
+            #     print("Finished recv")
+            #     break
             # write to the file the bytes we just received
             f.write(bytes_read)
+            bytes_read = client_socket.recv(BUFFER_SIZE)
+        
+        print("Finished recv")
 
 if __name__ == '__main__':
     server_program()
