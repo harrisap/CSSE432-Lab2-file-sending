@@ -48,6 +48,7 @@ def server_program():
                     break
                 elif data_stripped.find("iWant ", 0) == 0: # command words must be at the very start
                     filePath = data_stripped[6::]
+                    filePath = f"store/{filePath}"
                     print("calling iWant. Path is: " + filePath)
 
                     if(path.exists(filePath)):
@@ -76,6 +77,7 @@ def server_program():
                                         if not bytes_read:
                                             # file transmission is finished
                                             print("File sent!")
+                                            connection.send("FSENT".encode())
                                             break
 
                                         connection.sendall(bytes_read)
@@ -96,10 +98,12 @@ def server_program():
                     print("calling uTake. Path is: " + filePath)
 
                     connection.send("DATAI".encode())
+                    print("Sent DATAI")
 
                     # receive the file infos
                     # receive using client socket, not server socket
                     received = connection.recv(BUFFER_SIZE).decode()
+                    print("Got fileinfo:")
                     print(received)
                     filename, filesize = received.split(SEPARATOR)
                     # remove absolute path if there is
@@ -108,6 +112,7 @@ def server_program():
                     filesize = int(filesize)
 
                     connection.send("YRECV".encode())
+                    print("Sent YRECV. awaiting file data")
 
                     receive_file(filename, filesize, connection)
 
@@ -124,10 +129,8 @@ def server_program():
             print("Client connection was aborted - disconnecting them")
             connection.close()
 
-
         connection.close()
         print("Goodbye " + str(client_address))
-
 
 
 def receive_file(filename, filesize, client_socket):
@@ -137,22 +140,14 @@ def receive_file(filename, filesize, client_socket):
     with open(filename, "wb") as f:
         while True:
             bytes_read = client_socket.recv(BUFFER_SIZE)
-            if not bytes_read:    
+            decoded_bytes = bytes_read.decode()
+
+            if not bytes_read or decoded_bytes == "FSENT" :
                 # nothing is received; file transmitting is done
+                print("Finished recv")
                 break
             # write to the file the bytes we just received
             f.write(bytes_read)
-            # update the progress bar
-            # progress.update(len(bytes_read))
-        # final draw of progress bar
-        # progress.update(len(bytes_read))
-        # print(flush=True)
-
-    # close the client socket
-    # client_socket.close()
-    # # close the server socket
-    # s.close()
-
 
 if __name__ == '__main__':
     server_program()

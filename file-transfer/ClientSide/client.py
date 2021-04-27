@@ -81,6 +81,7 @@ def client_program():
                                     if not bytes_read:
                                         # file transmission is finished
                                         print("File sent!")
+                                        client_socket.send("FSENT".encode())
                                         # progress.update(len(bytes_read))
                                         break
 
@@ -131,8 +132,9 @@ def client_program():
                             while True:
 
                                 bytes_read = client_socket.recv(buff_size)
+                                decoded_bytes = bytes_read.decode()
 
-                                if not bytes_read:
+                                if not bytes_read or decoded_bytes == "FSENT" :
                                     # nothing recieved
                                     print("File transfer finished.")
                                     # progress.update(len(bytes_read))
