@@ -63,6 +63,7 @@ def server_program():
         connection.close()
         print("Goodbye " + str(client_address))
 
+
 def handleUTake(data_stripped, connection):
     filePath = data_stripped[6::]
     print("calling uTake. Path is: " + filePath)
@@ -86,6 +87,7 @@ def handleUTake(data_stripped, connection):
 
     receiveFile(filename, filesize, connection)
     connection.close()
+
 
 def handleIWant(data_stripped, connection):
     filePath = data_stripped[6::]
@@ -119,6 +121,7 @@ def handleIWant(data_stripped, connection):
         print("Requested file " + filePath + " does not exist, sending FILEN")
         connection.send("FILEN".encode()) # file does not exist
 
+
 def sendFile(filename, client_socket):
     with open(filename, "rb") as f:
         while True:
@@ -134,6 +137,7 @@ def sendFile(filename, client_socket):
             client_socket.sendall(bytes_read)
 
     print("Done sending file")
+
 
 def receiveFile(filename, filesize, client_socket):
     with open(filename, "wb") as f:

@@ -34,19 +34,23 @@ def client_program():
             command = message[0:5]
 
             try:
-                client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                client_socket.connect(server_addr)
+                client_socket = None
 
                 if(command == "uTake"):
+                    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    client_socket.connect(server_addr)
                     handleUTake(message, client_socket)
 
                 elif (command == "iWant"):
+                    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    client_socket.connect(server_addr)
                     handleIWant(client_socket, message)
 
                 else:
-                    print("not a valid command")
+                    print("That just ain't right!")
 
-                client_socket.close()
+                if client_socket:
+                    client_socket.close()
             except Exception as e:
                 print("Could not connect to server to run your command!")
                 print(e)
@@ -68,7 +72,7 @@ def handleUTake(message, client_socket):
 
             # server is requesting data info
 
-            print("Server waiting for file information...")
+            # print("Server waiting for file information...")
 
             client_socket.send(
                 f"{filename}{SEPARATOR}{filesize}".encode())
@@ -77,18 +81,19 @@ def handleUTake(message, client_socket):
 
             if(str(response) == "YRECV"):
 
-                print("Server accepted transfer!")
+                # print("Server accepted transfer!")
+                print("Transferring file from Willis to Server...")
 
                 sendFile(filename, client_socket)
 
             else:
-                print("server did not accept request 1")
+                print("Internal server error [1]")
 
         else:
-            print("server did not accept request 2")
+            print("Internal server error [2]")
 
     else:
-        print("file to send does not exist. cwd is:")
+        print("Willis, you idiot, you don't even have that file!\n(File not found) cwd is:")
         print(os.getcwd())
         # file to send does not exist
 
@@ -120,9 +125,9 @@ def handleIWant(client_socket, message):
             print("⚠ Bad structure for response data")
 
     else:
-        print("File does not exist in server...")
-        print("Got back: ")
-        print(data)
+        print("Failure:  What you talkin' bout Willis?  I ain't seen that file nowhere!")
+        print("(Check if you got the file path correct)")
+
 
 def sendFile(filename, client_socket):
     with open(filename, "rb") as f:
@@ -133,12 +138,11 @@ def sendFile(filename, client_socket):
 
             if not bytes_read:
                 # file transmission is finished
-                print("File sent!")
+                print("File sent! Thanks Willis!")
                 break
 
             client_socket.sendall(bytes_read)
 
-    print("Done sending file")
 
 def receiveFile(savelocation, client_socket):
     from pathlib import Path
