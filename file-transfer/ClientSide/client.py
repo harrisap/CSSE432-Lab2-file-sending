@@ -5,7 +5,7 @@ import tqdm
 import os.path
 from os import path
 
-help_msg = "Valid commands are: iWant, uTake, help\nType ';;;' to exit."
+help_msg = "Valid commands are: iWant, uTake, help\nType 'exit' to exit."
 
 SEPARATOR = "<SEPARATOR>"
 
@@ -20,43 +20,37 @@ def client_program():
     port = int(sys.argv[2])
     server_addr = (sys.argv[1], port)
 
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    client_socket.connect(server_addr)
-
+    print("Will connect to " + str(server_addr))
     print(help_msg)
-
-    #TODO connectionreseterror
 
     while True:
         message = input("> ")
         message = message.strip()
-        if message == ';;;':
+        if message == 'exit':
             break
         elif message == 'help':
             print(help_msg)
         else:
-
             command = message[0:5]
 
-            if(command == "uTake"):
+            try:
+                client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                client_socket.connect(server_addr)
 
-                # uTake command
+                if(command == "uTake"):
+                    handleUTake(message, client_socket)
 
-                handleUTake(message, client_socket)
-                    # file to send does not exist
+                elif (command == "iWant"):
+                    handleIWant(client_socket, message)
 
-            elif (command == "iWant"):
+                else:
+                    print("not a valid command")
 
-                # iWant command
+                client_socket.close()
+            except Exception as e:
+                print("Could not connect to server to run your command!")
+                print(e)
 
-                handleIWant(client_socket, message)
-
-            else:
-                print("not a valid command")
-                # not a valid command
-
-    client_socket.close()
 
 def handleUTake(message, client_socket):
     if(path.exists(message[6:])):
